@@ -1,4 +1,9 @@
 #include "image.h" 
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+int first_ligne;
 //------------------------------------------------------------------------------
 // Code source pour le projet d'UE035
 // description : (les fonctions sont définit dans image.h)
@@ -17,7 +22,15 @@
 // permet de creer une image en memoire de largeur arg1 et de hauteur arg2, la fonction 
 // retourne un pointeur de type : struct fichierimage *
 //------------------------------------------------------------------------------
-
+int debut_text(struct fichierimage *fichier)
+{
+	int i, j;	
+	for(j=0;j<fichier->entetebmp.largeur; j++)
+		for(i=0;i<fichier->entetebmp.hauteur; i++)
+			if(fichier->image[i][j].r == 255)
+				return j;
+	
+}
 /*Permet de mettre l'image en niv gris*/ 
 void niv_gris(struct fichierimage *fichier)
 {
@@ -33,45 +46,78 @@ void niv_gris(struct fichierimage *fichier)
 		    fichier->image[i][j].r=nv_gris;
 		}
 	}
-	enregistrer("Document_nv_gris.bmp",fichier);
+	enregistrer("image_nvgris.bmp",fichier);
 	free(fichier);
 }
 
 /*Inversion des contrastes */
-void inv_contraste(struct fichierimage *fichier,int seuil)
+void inv_contraste(struct fichierimage *fichier)
 {
-	int i , j ;
-	int nv_gris=0 , inv_contraste =0;
-	for(i=fichier->entetebmp.hauteur;i>=0;i--)
+	int i, j;
+	int seuil=128,nbpix=0;
+	
+	for(j=0; j<fichier->entetebmp.hauteur; j++)
 	{
-	    	for(j=0;j<fichier->entetebmp.largeur;j++)
+		for(i=0; i<fichier->entetebmp.largeur; i++)
 		{
-		    nv_gris=fichier->image[i][j].b; // Recuperation de la valeur nv gris
-		    inv_contraste = 255 - nv_gris;
-
-		    //Binarisation	
-		    if(inv_contraste>seuil)
+			if( fichier->image[i][j].r < seuil )
 			{
-				fichier->image[i][j].b=255;
-				fichier->image[i][j].g=255;
-				fichier->image[i][j].r=255;
+				fichier->image[i][j].r = 255;
+				fichier->image[i][j].g = 255;
+				fichier->image[i][j].b = 255;
 			}
-		    else
+			else
 			{
-				fichier->image[i][j].b=0;
-				fichier->image[i][j].g=0;
-				fichier->image[i][j].r=0;
-			}
+				fichier->image[i][j].r = 0;
+				fichier->image[i][j].g = 0;
+				fichier->image[i][j].b = 0;
 
+			}
 		}
 	}
-
-	enregistrer("Document_binaire.bmp",fichier);
-	free(fichier);
+	enregistrer("image_binaire.bmp",fichier);
+	supprimer(fichier);
 }
 
-void extract_ligne(struct fichierimage *fichier, int num_ligne)
+void extract_ligne(struct fichierimage *fichier)
 {
+	int i, j;
+	int stop=0,debut=0;
+
+	//struct fichierimage *text[]= NULL;
+	struct fichierimage *ligne = NULL;
+	ligne=nouveau(fichier->entetebmp.largeur,fichier->entetebmp.hauteur); 
+
+	debut=debut_text(fichier);
+	printf("debut text : %d",debut);
+	for(j=debut; j<fichier->entetebmp.hauteur; j++)
+	{
+		for(i=0; i<fichier->entetebmp.largeur; i++)
+		{
+			if(fichier->image[i][j].r==255)
+			{
+				ligne->image[i][j].r=fichier->image[i][j].r;
+				ligne->image[i][j].g=fichier->image[i][j].g;
+				ligne->image[i][j].b=fichier->image[i][j].b;
+			}
+			else
+			{
+				stop++;
+			}
+		}
+		if(stop==fichier->entetebmp.largeur)
+		{
+			printf("ici stop = %d j:%d\n",stop,j);
+			enregistrer("image_ligne1.bmp",ligne);
+			supprimer(ligne);
+			printf("j = %d\n",j);
+			return;
+		}
+		else
+		{
+			stop=0;
+		}
+	}
 
 }
 
@@ -81,15 +127,13 @@ int main()
 // exemple de déclaration d'un pointeur image
 struct fichierimage *fichier=NULL;
 
+//1- Inversion des Contrastes  de l'image et binarisation de l'image
 
-//1er traitement - Mettre l'image en niveau de gris
-fichier=charger("Document1.bmp");
-niv_gris(fichier);
+fichier = charger ("Document1.bmp");
 
-//2		- Inversion des Contrastes  de l'image et binarisation de l'image
+inv_contraste(fichier);
 
-fichier = charger ("Document_nv_gris.bmp");
-inv_contraste(fichier,128);
-
+fichier = charger ("image_binaire.bmp");
+extract_ligne(fichier);
 
 }
