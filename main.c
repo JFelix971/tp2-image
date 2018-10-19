@@ -106,11 +106,6 @@ void extract_index_ligne(struct fichierimage *fichier)
 		}
 	}
 
-	/*for(j=0;j<fichier->entetebmp.hauteur;j++)
-	{
-		printf(" fulline : %d  index : %d\n",fulline[j],j);
-	}*/
-
 	for(j=0;j<fichier->entetebmp.hauteur; j++)
 	{
 		if(fulline[j] > 0 && fulline[j-1]==0)
@@ -129,6 +124,7 @@ void extract_index_ligne(struct fichierimage *fichier)
 
 int main()
 {
+	//Init des tableaux globaux pour index line and caractere
 	int i;
 	for(i=0;i<nb_cases;i++)
 	{
