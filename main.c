@@ -106,6 +106,7 @@ void extract_index_ligne(struct fichierimage *fichier)
 		}
 	}
 
+	//Ajout des index de fin et debut de chaque ligne 
 	for(j=0;j<fichier->entetebmp.hauteur; j++)
 	{
 		if(fulline[j] > 0 && fulline[j-1]==0)
