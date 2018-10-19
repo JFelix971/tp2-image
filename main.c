@@ -3,11 +3,12 @@
 #include<stdlib.h>
 #include<string.h>
 
-int  nb_cases=100;
-int debut_ligne[100];
-int fin_ligne[100];
-int debut_caract[100];
-int fin_caract[100];
+int nb_line=30;
+int  nb_caract=100;
+int debut_ligne[30];
+int fin_ligne[30];
+int debut_caracteres[30][100];
+int fin_caracteres[30][100];
 
 //------------------------------------------------------------------------------
 // Code source pour le projet d'UE035
@@ -147,16 +148,58 @@ void extract_line(struct fichierimage *fichier,int num_line)
 
 }
 
+void extract_index_caractere(struct fichierimage *fichier)
+{
+	int i, j,k;
+	int line=0;
+	int index_caract=0;
+	int fullcaract[fichier->entetebmp.largeur];
+
+	for(i=0;i<fichier->entetebmp.largeur;i++)
+		fullcaract[i]=0;
+
+	//On parcours limage et si cest allume on incremente full line pour determiner les lignes en j
+	for(line=0;line<nb_line;line++)
+	{
+		for(j=debut_ligne[line];j<fin_ligne[line]; j++)
+		{
+			for(i=0;i<fichier->entetebmp.largeur;i++)
+			{
+				if(fichier->image[i][j].r > 0)
+				{
+					fullcaract[i]+=1;//songer à creer une structure line qui aurait le tableau de i pour chaque ligneou bien un tableau de pointeurs qui pointe sur un tableau
+				}
+			}
+		}
+		//Ajout des index de fin et debut de chaque ligne
+		for(k=0;k<fichier->entetebmp.largeur; k++)
+		{
+			if(fullcaract[k] > 0 && fullcaract[k-1]==0)
+			{
+				debut_caracteres[line][index_caract]=k;
+			}
+			else if(fullcaract[k]>0 && fullcaract[k+1]==0)
+			{
+				fin_caracteres[line][index_caract]=k;
+				index_caract+=1;
+			}
+		}
+	}
+}
+
 int main()
 {
 	//Init des tableaux globaux pour index line and caractere
-	int i;
-	for(i=0;i<nb_cases;i++)
+	int i,j;
+	for(i=0;i<nb_line;i++)
 	{
 		debut_ligne[i]=0;
 		fin_ligne[i]=0;
-		debut_caract[i]=0;
-		fin_ligne[i]=0;
+		for(j=0;j<nb_caract;j++)
+		{
+			debut_caracteres[i][j]=0;
+			fin_caracteres[i][j]=0;
+		}
 	}
 	// exemple de d�claration d'un pointeur image
 	struct fichierimage *fichier=NULL;
