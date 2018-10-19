@@ -84,7 +84,7 @@ void inv_contraste(struct fichierimage *fichier)
 	supprimer(fichier);
 }
 
-void extract_index_ligne(struct fichierimage *fichier)
+void extract_index_line(struct fichierimage *fichier)
 {
 	int i, j;
 	int index_line=0;
@@ -106,21 +106,45 @@ void extract_index_ligne(struct fichierimage *fichier)
 		}
 	}
 
-	//Ajout des index de fin et debut de chaque ligne 
+	//Ajout des index de fin et debut de chaque ligne
 	for(j=0;j<fichier->entetebmp.hauteur; j++)
 	{
 		if(fulline[j] > 0 && fulline[j-1]==0)
 		{
 			debut_ligne[index_line]=j;
-			printf("debut_ligne = %d  index = %d ",debut_ligne[index_line],index_line);
+			//printf("debut_ligne = %d  index = %d ",debut_ligne[index_line],index_line);
 		}
 		else if(fulline[j]>0 && fulline[j+1]==0)
 		{
 			fin_ligne[index_line]=j;
-			printf("fin_ligne = %d  index = %d \n",fin_ligne[index_line],index_line);
+			//printf("fin_ligne = %d  index = %d \n",fin_ligne[index_line],index_line);
 			index_line+=1;
 		}
 	}
+}
+
+void extract_line(struct fichierimage *fichier,int num_line)
+{
+	int i=0,j=0;
+
+	struct fichierimage *buff=NULL;
+	buff=nouveau(fichier->entetebmp.largeur,fichier->entetebmp.hauteur);
+	//printf(" hauteur buff = %d largeur= %d \n",buff->entetebmp.hauteur,buff->entetebmp.largeur);
+	//printf(" hauteur buff = %d largeur= %d \n",fichier->entetebmp.hauteur,fichier->entetebmp.largeur);
+	//printf("debut: %d fin: %d \n",debut_ligne[num_line-1],fin_ligne[num_line-1]);
+	for(j=debut_ligne[num_line-1]; j<fin_ligne[num_line-1]; j++)
+	{
+		for(i=0; i<fichier->entetebmp.largeur; i++)
+		{
+			buff->image[i][j].b=fichier->image[i][j].b;
+			buff->image[i][j].g=fichier->image[i][j].g;
+			buff->image[i][j].r=fichier->image[i][j].r;
+
+		}
+	}
+	enregistrer("ligne_.bmp",buff);
+	supprimer(buff);
+
 }
 
 int main()
@@ -140,10 +164,11 @@ int main()
 	//1- Inversion des Contrastes  de l'image et binarisation de l'image
 
 	fichier = charger ("Document1.bmp");
-
 	inv_contraste(fichier);
 
 	fichier = charger ("image_binaire.bmp");
-	extract_index_ligne(fichier);
+	extract_index_line(fichier);
 
+	fichier = charger ("image_binaire.bmp");
+	extract_line(fichier,6);
 }
