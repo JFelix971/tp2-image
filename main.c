@@ -5,6 +5,7 @@
 
 int nb_lignes_txt=0;
 int  nb_caract=100;
+int nb_caract_by_line[30];
 int debut_ligne[30];
 int fin_ligne[30];
 int debut_caracteres[30][100];
@@ -37,12 +38,28 @@ void init_variables_globales()
 	{
 		debut_ligne[i]=0;
 		fin_ligne[i]=0;
+		nb_caract_by_line[i]=0;
 		for(j=0;j<nb_caract;j++)
 		{
 			debut_caracteres[i][j]=0;
 			fin_caracteres[i][j]=0;
 		}
 	}
+}
+
+int minVoisin(int *tab)
+{
+	int i, min=0;
+	for (i=0;i<9;i++)
+	{
+		if (tab[i] < min && tab[i] > 0 || min ==0)
+		{
+			min = tab[i];
+		}
+
+	}
+
+	return min;
 }
 
 int debut_text(struct fichierimage *fichier)
@@ -54,6 +71,7 @@ int debut_text(struct fichierimage *fichier)
 				return j;
 
 }
+
 /*Permet de mettre l'image en niv gris*/
 void niv_gris(struct fichierimage *fichier)
 {
@@ -100,6 +118,183 @@ void inv_contraste(struct fichierimage *fichier)
 	}
 	enregistrer("image_binaire.bmp",fichier);
 	supprimer(fichier);
+}
+void erosion (struct fichierimage * fichier)
+{
+	int i, j, k, minvois=0;
+	int voisins[9]={0,0,0,0,0,0,0,0,0};
+
+	struct fichierimage *buff;
+	//buff=nouveau(fichier->entetebmp.largeur,fichier->entetebmp.hauteur);
+	buff=clone(fichier);
+	for(j=1; j<fichier->entetebmp.hauteur-1; j++)
+	{
+		for(i=1; i<fichier->entetebmp.largeur-1; i++)
+		{
+			if( fichier->image[i][j].r > 0)
+			{
+				voisins[0]=fichier->image[i-1][j-1].r;
+				voisins[1]=fichier->image[i-1][j].r;
+				voisins[2]=fichier->image[i-1][j+1].r;
+				voisins[3]=fichier->image[i][j-1].r;
+				voisins[4]=fichier->image[i][j+1].r;
+				voisins[5]=fichier->image[i+1][j-1].r;
+				voisins[6]=fichier->image[i+1][j].r;
+				voisins[7]=fichier->image[i+1][j+1].r;
+				voisins[8]=fichier->image[i][j].r;
+				//On utilise un filtre manuel pour eroder l image , on verifie chaque voisin
+				for(k=0;voisins[k] == 0;k++)
+				{
+					buff->image[i][j].r = 0;
+					buff->image[i][j].g = 0;
+					buff->image[i][j].b = 0;
+				}
+
+			}
+		}
+	}
+
+	enregistrer("image_erode.bmp",buff);
+	supprimer(buff);
+	//ouvrir_image(fichier->entetebmp.hauteur,fichier->entetebmp.largeur,"image_erode.bmp");
+}
+
+void dilatation (struct fichierimage * fichier)
+{
+	int i, j, k;
+	int x,y;
+
+	struct fichierimage *buff;
+	buff=nouveau(fichier->entetebmp.largeur,fichier->entetebmp.hauteur);
+
+	for(j=1; j<fichier->entetebmp.hauteur-1; j++)
+	{
+		for(i=1; i<fichier->entetebmp.largeur-1; i++)
+		{
+			if( fichier->image[i][j].r > 0)
+			{
+				for(x=0;x<3;x++)
+					for(y=0;y<3;y++)
+					{
+						buff->image[i+(x-1)][j+(y-1)].r = 255;
+						buff->image[i+(x-1)][j+(y-1)].g = 255;
+						buff->image[i+(x-1)][j+(y-1)].b = 255;
+					}
+			}
+		}
+	}
+
+	enregistrer("image_dilate.bmp",buff);
+	free(buff);
+
+}
+
+int etiquetage(struct fichierimage* fichier)/*OK*/
+{
+	int i, j, t;
+	int etiquette = 1 ;
+	int test = 1;
+	int voisins[9]={0,0,0,0,0,0,0,0,0};
+	int minvois = 0;
+	int T[fichier->entetebmp.largeur][fichier->entetebmp.hauteur];
+
+	struct fichierimage *buff;
+	buff=nouveau(fichier->entetebmp.largeur,fichier->entetebmp.hauteur);
+
+	for(j=0;j<fichier->entetebmp.hauteur;j++)
+		for(i=0;i<fichier->entetebmp.largeur;i++)
+			T[i][j]=0;
+
+	while( test == 1)
+	{
+		test = 0;
+		for(j=1; j<fichier->entetebmp.hauteur-1; j++)
+		{
+			for(i=1; i<fichier->entetebmp.largeur-1; i++)
+			{
+				if(fichier->image[i][j].r > 0)
+				{
+					voisins[0]=T[i-1][j-1];
+					voisins[1]=T[i-1][j];
+					voisins[2]=T[i-1][j+1];
+					voisins[3]=T[i][j-1];
+					voisins[4]=T[i][j+1];
+					voisins[5]=T[i+1][j-1];
+					voisins[6]=T[i+1][j];
+					voisins[7]=T[i+1][j+1];
+					voisins[8]=T[i][j] == 0 ? etiquette : T[i][j];
+					minvois=T[i][j]=minVoisin(voisins);
+					etiquette += T[i][j] == etiquette;
+				}//finsi
+			}//fin pour2
+		}//finpour1
+
+		//second parours bas en haut, droite gauche
+		for(j=fichier->entetebmp.hauteur-1; j>1; j--)
+		{
+			for(i=fichier->entetebmp.largeur-1; i>1; i--)
+			{
+				if(fichier->image[i][j].r > 0)
+				{
+					voisins[0]=T[i-1][j-1];
+					voisins[1]=T[i-1][j];
+					voisins[2]=T[i-1][j+1];
+					voisins[3]=T[i][j-1];
+					voisins[4]=T[i][j+1];
+					voisins[5]=T[i+1][j-1];
+					voisins[6]=T[i+1][j];
+					voisins[7]=T[i+1][j+1];
+					voisins[8]=T[i][j] == 0 ? etiquette : T[i][j];
+					minvois=T[i][j]=minVoisin(voisins);
+					etiquette += T[i][j] == etiquette;
+				}//finsi
+			}//fin pour2
+		}//finpour1
+	}//fintantque
+	//Affichage de l image etiquetter en mettant des couleurs correspondant a chaque etiquette
+	for(j=0;j<fichier->entetebmp.hauteur;j++)
+		for(i=0;i<fichier->entetebmp.largeur;i++)
+		{
+
+				srand(T[i][j]);
+				buff->image[i][j].r=rand()%256;
+				buff->image[i][j].g=rand()%256;
+				buff->image[i][j].b=rand()%256;
+		}
+	enregistrer("image_etique.bmp",buff);
+	supprimer(buff);
+	return etiquette;
+}
+
+void amelioration_eti(struct fichierimage *fichier)
+{
+	int i, j, k;
+	int etiquette=0;
+	int nb_eti[3]={rand()%256,rand()%256,rand()%256};
+	int nb_action=0;
+	struct fichierimage *buff;
+	buff=clone(fichier);
+
+	//for(i=0;i<3;i++)
+	//	nb_eti[i]=0;
+
+	while(nb_eti[0]!=nb_eti[1] && nb_eti[1]!=nb_eti[2])
+	{
+		nb_eti[nb_action%3]=etiquetage(fichier);
+		printf(" etiquette = %d \n",nb_eti[nb_action%3]);
+		erosion(fichier);
+		nb_action++;
+		fichier=charger("image_erode.bmp");
+		printf(" nb action = %d\n",nb_action);
+	}
+	for(k=0;k<nb_action;k++)
+	{
+		dilatation(fichier);
+		fichier=charger("image_dilate.bmp");
+	}
+	fichier=charger("image_dilate.bmp");
+	etiquette=etiquetage(fichier);
+	printf("nb etiquette = %d\n",etiquette);
 }
 
 void extract_index_line(struct fichierimage *fichier)
@@ -151,8 +346,7 @@ void extract_line(struct fichierimage *fichier,int num_line)
 	hauteur_ligne=fin_ligne[num_line-1] - debut_ligne[num_line-1];
 	//printf("hauteur line= %d\n",hauteur_ligne );
 	buff=nouveau(fichier->entetebmp.largeur,hauteur_ligne);
-	//printf(" hauteur buff = %d largeur= %d \n",buff->entetebmp.hauteur,buff->entetebmp.largeur);
-	//printf(" hauteur buff = %d largeur= %d \n",fichier->entetebmp.hauteur,fichier->entetebmp.largeur);
+
 	//printf("debut: %d fin: %d \n",debut_ligne[num_line-1],fin_ligne[num_line-1]);
 	for(j=debut_ligne[num_line-1]; j<fin_ligne[num_line-1]; j++)
 	{
@@ -190,7 +384,7 @@ void extract_index_caractere(struct fichierimage *fichier)
 			fullcaract[line][i]=0;
 
 	//On parcours limage et si cest allume on incremente full line pour determiner les lignes en j
-	for(line=0;line<nb_lignes_txt;line++)
+	for(line=0;line<nb_lignes_txt-1;line++)
 	{
 		for(j=debut_ligne[line];j<fin_ligne[line]; j++)
 		{
@@ -215,10 +409,10 @@ void extract_index_caractere(struct fichierimage *fichier)
 				index_caract+=1;
 			}
 		}
-		printf("ligne : %d nb caract = %d\n",line+1,index_caract);
+		nb_caract_by_line[line]=index_caract;
+		printf("ligne : %d nb caract = %d\n",line+1,nb_caract_by_line[line]);
 		index_caract=0;
 	}
-	printf("nb caracteres : %d \n",index_caract);
 }
 
 int main()
@@ -242,6 +436,11 @@ int main()
 	//extract_line(fichier,6);
 	recup_lines(fichier);
 
+	//Recup les index des caracters pour chaque ligne et compte le nb de caracteres par ligne
 	fichier = charger ("image_binaire.bmp");
 	extract_index_caractere(fichier);
+
+	//2e methode pour compter et etiqueter les caracteres mais moins precises que extract_index_caractere
+	/*fichier = charger ("lignes/ligne_1.bmp");
+	amelioration_eti(fichier);*/
 }
