@@ -126,10 +126,14 @@ void extract_index_line(struct fichierimage *fichier)
 
 void extract_line(struct fichierimage *fichier,int num_line)
 {
-	int i=0,j=0;
+	int i=0,j=0,j_bis=0;
+	int hauteur_ligne=0;
+	char nom[50];
 
 	struct fichierimage *buff=NULL;
-	buff=nouveau(fichier->entetebmp.largeur,fichier->entetebmp.hauteur);
+	hauteur_ligne=fin_ligne[num_line-1] - debut_ligne[num_line-1];
+	printf("hauteur line= %d\n",hauteur_ligne );
+	buff=nouveau(fichier->entetebmp.largeur,hauteur_ligne);
 	//printf(" hauteur buff = %d largeur= %d \n",buff->entetebmp.hauteur,buff->entetebmp.largeur);
 	//printf(" hauteur buff = %d largeur= %d \n",fichier->entetebmp.hauteur,fichier->entetebmp.largeur);
 	//printf("debut: %d fin: %d \n",debut_ligne[num_line-1],fin_ligne[num_line-1]);
@@ -137,13 +141,15 @@ void extract_line(struct fichierimage *fichier,int num_line)
 	{
 		for(i=0; i<fichier->entetebmp.largeur; i++)
 		{
-			buff->image[i][j].b=fichier->image[i][j].b;
-			buff->image[i][j].g=fichier->image[i][j].g;
-			buff->image[i][j].r=fichier->image[i][j].r;
+			buff->image[i][j_bis].b=fichier->image[i][j].b;
+			buff->image[i][j_bis].g=fichier->image[i][j].g;
+			buff->image[i][j_bis].r=fichier->image[i][j].r;
 
 		}
+		j_bis++;
 	}
-	enregistrer("ligne_.bmp",buff);
+	sprintf(nom,"lignes/ligne_%d.bmp",num_line);
+	enregistrer(nom,buff);
 	supprimer(buff);
 
 }
