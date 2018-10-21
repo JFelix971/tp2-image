@@ -341,7 +341,9 @@ void extract_line(struct fichierimage *fichier,int num_line)
 {
 	int i=0,j=0,j_bis=0;
 	int hauteur_ligne=0;
+	char NOM_FICHIER[50];
 	char nom[50];
+	FILE *FIFCHIER;
 	struct fichierimage *buff=NULL;
 	hauteur_ligne=fin_ligne[num_line-1] - debut_ligne[num_line-1];
 	//printf("hauteur line= %d\n",hauteur_ligne );
