@@ -3,7 +3,7 @@
 #include<stdlib.h>
 #include<string.h>
 
-int nb_line=30;
+int nb_lignes_txt=0;
 int  nb_caract=100;
 int debut_ligne[30];
 int fin_ligne[30];
@@ -28,6 +28,23 @@ int fin_caracteres[30][100];
 // permet de creer une image en memoire de largeur arg1 et de hauteur arg2, la fonction
 // retourne un pointeur de type : struct fichierimage *
 //------------------------------------------------------------------------------
+
+void init_variables_globales()
+{
+	//Init des tableaux globaux pour index line and caractere
+	int i,j;
+	for(i=0;i<nb_lignes_txt;i++)
+	{
+		debut_ligne[i]=0;
+		fin_ligne[i]=0;
+		for(j=0;j<nb_caract;j++)
+		{
+			debut_caracteres[i][j]=0;
+			fin_caracteres[i][j]=0;
+		}
+	}
+}
+
 int debut_text(struct fichierimage *fichier)
 {
 	int i, j;
@@ -122,6 +139,7 @@ void extract_index_line(struct fichierimage *fichier)
 			index_line+=1;
 		}
 	}
+	nb_lignes_txt=index_line+1;
 }
 
 void extract_line(struct fichierimage *fichier,int num_line)
@@ -129,10 +147,9 @@ void extract_line(struct fichierimage *fichier,int num_line)
 	int i=0,j=0,j_bis=0;
 	int hauteur_ligne=0;
 	char nom[50];
-
 	struct fichierimage *buff=NULL;
 	hauteur_ligne=fin_ligne[num_line-1] - debut_ligne[num_line-1];
-	printf("hauteur line= %d\n",hauteur_ligne );
+	//printf("hauteur line= %d\n",hauteur_ligne );
 	buff=nouveau(fichier->entetebmp.largeur,hauteur_ligne);
 	//printf(" hauteur buff = %d largeur= %d \n",buff->entetebmp.hauteur,buff->entetebmp.largeur);
 	//printf(" hauteur buff = %d largeur= %d \n",fichier->entetebmp.hauteur,fichier->entetebmp.largeur);
@@ -154,6 +171,13 @@ void extract_line(struct fichierimage *fichier,int num_line)
 
 }
 
+void recup_lines(struct fichierimage *fichier)
+{
+	int i;
+	for(i=1;i<nb_lignes_txt;i++)
+		extract_line(fichier,i);
+}
+
 void extract_index_caractere(struct fichierimage *fichier)
 {
 	int i, j,k;
@@ -165,7 +189,7 @@ void extract_index_caractere(struct fichierimage *fichier)
 		fullcaract[i]=0;
 
 	//On parcours limage et si cest allume on incremente full line pour determiner les lignes en j
-	for(line=0;line<nb_line;line++)
+	for(line=0;line<nb_lignes_txt;line++)
 	{
 		for(j=debut_ligne[line];j<fin_ligne[line]; j++)
 		{
@@ -195,29 +219,22 @@ void extract_index_caractere(struct fichierimage *fichier)
 
 int main()
 {
-	//Init des tableaux globaux pour index line and caractere
-	int i,j;
-	for(i=0;i<nb_line;i++)
-	{
-		debut_ligne[i]=0;
-		fin_ligne[i]=0;
-		for(j=0;j<nb_caract;j++)
-		{
-			debut_caracteres[i][j]=0;
-			fin_caracteres[i][j]=0;
-		}
-	}
-	// exemple de d�claration d'un pointeur image
+	// exemple de declaration d'un pointeur image
 	struct fichierimage *fichier=NULL;
 
-	//1- Inversion des Contrastes  de l'image et binarisation de l'image
+	//Init init_variables_globales
+	init_variables_globales();
 
+	//1- Inversion des Contrastes  de l'image et binarisation de l'image
 	fichier = charger ("Document1.bmp");
 	inv_contraste(fichier);
 
+	//extraction des index de chaque lignes
 	fichier = charger ("image_binaire.bmp");
 	extract_index_line(fichier);
 
+	//Mettre toutes els lignes extraites dans un dossier pour chaucunes des lignes
 	fichier = charger ("image_binaire.bmp");
-	extract_line(fichier,6);
+	//extract_line(fichier,6);
+	recup_lines(fichier);
 }
