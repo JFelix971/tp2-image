@@ -183,10 +183,11 @@ void extract_index_caractere(struct fichierimage *fichier)
 	int i, j,k;
 	int line=0;
 	int index_caract=0;
-	int fullcaract[fichier->entetebmp.largeur];
+	int fullcaract[nb_lignes_txt][fichier->entetebmp.largeur];
 
-	for(i=0;i<fichier->entetebmp.largeur;i++)
-		fullcaract[i]=0;
+	for(line=0;line<nb_lignes_txt;line++)
+		for(i=0;i<fichier->entetebmp.largeur;i++)
+			fullcaract[line][i]=0;
 
 	//On parcours limage et si cest allume on incremente full line pour determiner les lignes en j
 	for(line=0;line<nb_lignes_txt;line++)
@@ -197,24 +198,27 @@ void extract_index_caractere(struct fichierimage *fichier)
 			{
 				if(fichier->image[i][j].r > 0)
 				{
-					fullcaract[i]+=1;//songer à creer une structure line qui aurait le tableau de i pour chaque ligneou bien un tableau de pointeurs qui pointe sur un tableau
+					fullcaract[line][i]+=1;//songer à creer une structure line qui aurait le tableau de i pour chaque ligneou bien un tableau de pointeurs qui pointe sur un tableau
 				}
 			}
 		}
 		//Ajout des index de fin et debut de chaque ligne
 		for(k=0;k<fichier->entetebmp.largeur; k++)
 		{
-			if(fullcaract[k] > 0 && fullcaract[k-1]==0)
+			if(fullcaract[line][k] > 0 && fullcaract[line][k-1]==0)
 			{
 				debut_caracteres[line][index_caract]=k;
 			}
-			else if(fullcaract[k]>0 && fullcaract[k+1]==0)
+			else if(fullcaract[line][k]>0 && fullcaract[line][k+1]==0)
 			{
 				fin_caracteres[line][index_caract]=k;
 				index_caract+=1;
 			}
 		}
+		printf("ligne : %d nb caract = %d\n",line+1,index_caract);
+		index_caract=0;
 	}
+	printf("nb caracteres : %d \n",index_caract);
 }
 
 int main()
@@ -237,4 +241,7 @@ int main()
 	fichier = charger ("image_binaire.bmp");
 	//extract_line(fichier,6);
 	recup_lines(fichier);
+
+	fichier = charger ("image_binaire.bmp");
+	extract_index_caractere(fichier);
 }
