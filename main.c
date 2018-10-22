@@ -33,7 +33,7 @@ int fin_caracteres[30][100];
 // retourne un pointeur de type : struct fichierimage *
 //------------------------------------------------------------------------------
 
-void init_variables_globales()
+void init_variables_globales()/*OK*/
 {
 	//Init des tableaux globaux pour index line and caractere
 	int i,j;
@@ -50,7 +50,7 @@ void init_variables_globales()
 	}
 }
 
-int minVoisin(int *tab)
+int minVoisin(int *tab)/*OK*/
 {
 	int i, min=0;
 	for (i=0;i<9;i++)
@@ -65,7 +65,7 @@ int minVoisin(int *tab)
 	return min;
 }
 
-int debut_text(struct fichierimage *fichier)
+int debut_text(struct fichierimage *fichier)/*OK*/
 {
 	int i, j;
 	for(j=0;j<fichier->entetebmp.largeur; j++)
@@ -76,7 +76,7 @@ int debut_text(struct fichierimage *fichier)
 }
 
 /*Permet de mettre l'image en niv gris*/
-void niv_gris(struct fichierimage *fichier)
+void niv_gris(struct fichierimage *fichier)/*OK*/
 {
 	int nv_gris=0;
 	int i,j;
@@ -95,7 +95,7 @@ void niv_gris(struct fichierimage *fichier)
 }
 
 /*Inversion des contrastes */
-void inv_contraste(struct fichierimage *fichier)
+void inv_contraste(struct fichierimage *fichier)/*OK*/
 {
 	int i, j;
 	int seuil=128,nbpix=0;
@@ -122,7 +122,8 @@ void inv_contraste(struct fichierimage *fichier)
 	enregistrer("image_binaire.bmp",fichier);
 	supprimer(fichier);
 }
-void erosion (struct fichierimage * fichier)
+
+void erosion (struct fichierimage * fichier)/*OK*/
 {
 	int i, j, k, minvois=0;
 	int voisins[9]={0,0,0,0,0,0,0,0,0};
@@ -162,7 +163,7 @@ void erosion (struct fichierimage * fichier)
 	//ouvrir_image(fichier->entetebmp.hauteur,fichier->entetebmp.largeur,"image_erode.bmp");
 }
 
-void dilatation (struct fichierimage * fichier)
+void dilatation (struct fichierimage * fichier)/*OK*/
 {
 	int i, j, k;
 	int x,y;
@@ -269,7 +270,7 @@ int etiquetage(struct fichierimage* fichier)/*OK*/
 	return etiquette;
 }
 
-void amelioration_eti(struct fichierimage *fichier)
+void amelioration_eti(struct fichierimage *fichier)/*OK*/
 {
 	int i, j, k;
 	int etiquette=0;
@@ -300,7 +301,7 @@ void amelioration_eti(struct fichierimage *fichier)
 	printf("nb etiquette = %d\n",etiquette);
 }
 
-void extract_index_line(struct fichierimage *fichier)
+void extract_index_line(struct fichierimage *fichier)/*OK*/
 {
 	int i, j;
 	int index_line=0;
@@ -340,7 +341,7 @@ void extract_index_line(struct fichierimage *fichier)
 	nb_lignes_txt=index_line+1;
 }
 
-void extract_line(struct fichierimage *fichier,int num_line)
+void extract_line(struct fichierimage *fichier,int num_line)/*OK*/
 {
 	int i=0,j=0,j_bis=0;
 	int hauteur_ligne=0;
@@ -372,14 +373,14 @@ void extract_line(struct fichierimage *fichier,int num_line)
 
 }
 
-void recup_lines(struct fichierimage *fichier)
+void recup_lines(struct fichierimage *fichier)/*OK*/
 {
 	int i;
 	for(i=1;i<nb_lignes_txt;i++)
 		extract_line(fichier,i);
 }
 
-void extract_index_caractere(struct fichierimage *fichier)
+void extract_index_caractere(struct fichierimage *fichier)/*OK*/
 {
 	int i, j,k;
 	int line=0;
@@ -409,16 +410,70 @@ void extract_index_caractere(struct fichierimage *fichier)
 			if(fullcaract[line][k] > 0 && fullcaract[line][k-1]==0)
 			{
 				debut_caracteres[line][index_caract]=k;
+				//printf("carac : %d debut : %d ",index_caract,k);
 			}
 			else if(fullcaract[line][k]>0 && fullcaract[line][k+1]==0)
 			{
 				fin_caracteres[line][index_caract]=k;
+				//printf("fin : %d \n",k);
 				index_caract+=1;
 			}
 		}
 		nb_caract_by_line[line]=index_caract;
-		printf("ligne : %d nb caract = %d\n",line+1,nb_caract_by_line[line]);
+		//printf("ligne : %d nb caract = %d\n",line+1,nb_caract_by_line[line]);
 		index_caract=0;
+	}
+}
+
+void extract_caract(char nom_rep[50],int num_line,int index_caract)
+{
+	int i=0,j=0,j_bis=0,i_bis=0;;
+	int hauteur_ligne=0,largeur_caract=0;
+	char nom[50];
+	struct fichierimage *buff=NULL, *ligne=NULL;
+	hauteur_ligne=fin_ligne[num_line-1] - debut_ligne[num_line-1];
+	largeur_caract=fin_caracteres[num_line-1][index_caract] - debut_caracteres[num_line-1][index_caract];
+	printf("debut : %d\t fin: %d\t largeur_caract= %d\n", debut_caracteres[num_line-1][index_caract],fin_caracteres[num_line-1][index_caract],largeur_caract );
+	//sprintf(nom_ligne,"Text/ligne_%d/ligne_%d.bmp",num_line,num_line);
+	ligne=charger(nom_rep);
+	buff=nouveau(largeur_caract,hauteur_ligne);
+
+	//printf("debut: %d fin: %d \n",debut_ligne[num_line-1],fin_ligne[num_line-1]);
+	for(j=debut_ligne[num_line-1]; j<fin_ligne[num_line-1]; j++)
+	{
+		for(i=debut_caracteres[num_line-1][index_caract]; i<fin_caracteres[num_line-1][index_caract]; i++)
+		{
+			buff->image[i_bis][j_bis].b=ligne->image[i][j].b;
+			buff->image[i_bis][j_bis].g=ligne->image[i][j].g;
+			buff->image[i_bis][j_bis].r=ligne->image[i][j].r;
+			i_bis++;
+		}
+		j_bis++;
+		i_bis=0;
+	}
+	sprintf(nom,"Text/ligne_%d/%d.bmp",num_line,index_caract+1);
+	enregistrer(nom,buff);
+	supprimer(buff);
+}
+
+void recup_caract()
+{
+	int i,j;
+	char nom_rep[50];
+	struct fichierimage *ligne=NULL;
+	for(i=1;i<2/*nb_lignes_txt*/;i++)
+	{
+		ligne=NULL;
+		sprintf(nom_rep,"Text/ligne_%d/ligne_%d.bmp",i,i);
+		//ligne=charger(nom_rep);
+		printf("fichier : %s nb_carac=  %d\n",nom_rep,nb_caract_by_line[i-1]);
+
+		for(j=0;j<nb_caract_by_line[i-1];j++)
+		{
+			extract_caract(nom_rep,i,j);
+			//printf("j=%d\n",j);
+		}
+		//supprimer(ligne);
 	}
 }
 
@@ -447,7 +502,13 @@ int main()
 	fichier = charger ("image_binaire.bmp");
 	extract_index_caractere(fichier);
 
+	//fichier = charger("image_binaire.bmp");
+	recup_caract();
+
 	//2e methode pour compter et etiqueter les caracteres mais moins precises que extract_index_caractere
 	/*fichier = charger ("lignes/ligne_1.bmp");
 	amelioration_eti(fichier);*/
+
+
+//
 }
