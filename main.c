@@ -463,7 +463,8 @@ void recup_lines(struct fichierimage *fichier)/*OK*/
 	for(i=22/*1*/;i<nb_lignes_txt;i++)/* par tranche de 4 max sinon ça plante la machine car calcul torplong*/
 		extract_line(fichier,i);
 }
-/*
+
+
 void extract_index_caractere(struct fichierimage *fichier)
 {
 	int i, j,k;
@@ -508,8 +509,7 @@ void extract_index_caractere(struct fichierimage *fichier)
 		index_caract=0;
 	}
 }
-*/
-/*
+
 void extract_caract(char nom_rep[50],int num_line,int index_caract)
 {
 	int i=0,j=0,j_bis=0,i_bis=0;;
@@ -544,9 +544,9 @@ void extract_caract(char nom_rep[50],int num_line,int index_caract)
 	enregistrer(nom,buff);
 	supprimer(buff);
 }
-*/
 
-/*void recup_caract()
+
+void recup_caract()
 {
 	int i,j;
 	char nom_rep[50];
@@ -566,7 +566,7 @@ void extract_caract(char nom_rep[50],int num_line,int index_caract)
 		//supprimer(ligne);
 	}
 }
-*/
+
 int main()
 {
 	// exemple de declaration d'un pointeur image
@@ -598,7 +598,5 @@ int main()
 	//2e methode pour compter et etiqueter les caracteres mais moins precises que extract_index_caractere
 	/*fichier = charger ("lignes/ligne_1.bmp");
 	amelioration_eti(fichier);*/
-
-
-//
+	
 }
