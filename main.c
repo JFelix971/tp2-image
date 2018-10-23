@@ -304,6 +304,80 @@ void amelioration_eti(struct fichierimage *fichier)/*OK*/
 	printf("nb etiquette = %d\n",etiquette);
 }
 
+void extract_index_caractere2(struct fichierimage *fichier,int line)
+{
+	int i, j, k;
+	int index_caract=0;
+	int fullcaract[fichier->entetebmp.largeur];
+
+	for(i=0;i<fichier->entetebmp.largeur;i++)
+		fullcaract[i]=0;
+
+	//On parcours limage et si cest allume on incremente full line pour determiner les lignes en j
+	for(j=debut_ligne[line];j<fin_ligne[line]; j++)
+	{
+		for(i=0;i<fichier->entetebmp.largeur;i++)
+		{
+			if(fichier->image[i][j].r > 0)
+			{
+				fullcaract[i]+=1;//songer a creer une structure line qui aurait le tableau de i pour chaque ligneou bien un tableau de pointeurs qui pointe sur un tableau
+			}
+		}
+	}
+	//Ajout des index de fin et debut de chaque ligne
+	for(k=0;k<fichier->entetebmp.largeur; k++)
+	{
+		if(fullcaract[k] > 0 && fullcaract[k-1]==0)
+		{
+			debut_caracteres[line][index_caract]=k-2;
+			//printf("carac : %d debut : %d ",index_caract,k);
+		}
+		else if(fullcaract[k] > 0 && fullcaract[k+1]==0)
+		{
+			fin_caracteres[line][index_caract]=k+2;
+			//printf("fin : %d \n",k);
+			index_caract+=1;
+		}
+	}
+	nb_caract_by_line[line]=index_caract;
+	printf("ligne : %d nb caract = %d\n",line+1,nb_caract_by_line[line]);
+	//index_caract=0;
+}
+
+void extract_caract2(struct fichierimage *fichier,int num_line,int index_caract)
+{
+	int i=0,j=0,j_bis=0,i_bis=0;;
+	int hauteur_ligne=0,largeur_caract=0;
+	char nom[50];
+	struct fichierimage *buff=NULL, *ligne=NULL;
+	hauteur_ligne=fin_ligne[num_line-1] - debut_ligne[num_line-1];
+	largeur_caract=fin_caracteres[num_line-1][index_caract] - debut_caracteres[num_line-1][index_caract];
+
+	ligne=clone(fichier);
+	//ligne=charger(nom_rep);
+	buff=nouveau(largeur_caract,hauteur_ligne);
+	//buff=nouveau(ligne->entetebmp.largeur,ligne->entetebmp.hauteur);
+	printf("debut: %d fin: %d \n",debut_ligne[num_line-1],fin_ligne[num_line-1]);
+	for(j=debut_ligne[num_line-1]; j<fin_ligne[num_line-1]; j++)
+	{
+		for(i=debut_caracteres[num_line-1][index_caract]; i<fin_caracteres[num_line-1][index_caract]; i++)
+		{
+			buff->image[i_bis][j_bis].b=ligne->image[i][j].b;
+			buff->image[i_bis][j_bis].g=ligne->image[i][j].g;
+			buff->image[i_bis][j_bis].r=ligne->image[i][j].r;
+			i_bis++;
+			//buff->image[i][j].b=ligne->image[i][j].b;
+			//buff->image[i][j].g=ligne->image[i][j].g;
+			//buff->image[i][j].r=ligne->image[i][j].r;
+		}
+		j_bis++;
+		i_bis=0;
+	}
+	sprintf(nom,"Text2/ligne_%d/%d.bmp",num_line,index_caract+1);
+	enregistrer(nom,buff);
+	supprimer(buff);
+}
+
 void extract_index_line(struct fichierimage *fichier)/*OK*/
 {
 	int i, j;
@@ -368,22 +442,29 @@ void extract_line(struct fichierimage *fichier,int num_line)/*OK*/
 		}
 		j_bis++;
 	}
-	sprintf(NOM_REP,"Text/ligne_%d",num_line);
+	sprintf(NOM_REP,"Text2/ligne_%d",num_line);//Modifier si on utilise la premiere methode ou la second
 	rep=mkdir(NOM_REP,S_IRWXU);
-	sprintf(nom,"Text/ligne_%d/ligne_%d.bmp",num_line,num_line);
+	sprintf(nom,"Text2/ligne_%d/ligne_%d.bmp",num_line,num_line);//Modifier text selon methode
 	enregistrer(nom,buff);
 	supprimer(buff);
+
+	extract_index_caractere2(fichier,num_line-1);//Extraction des index par num_line
+	for(i=0;i<nb_caract_by_line[num_line-1];i++)
+	{
+		extract_caract2(fichier,num_line,i);
+	}
+	//supprimer(buff);
 
 }
 
 void recup_lines(struct fichierimage *fichier)/*OK*/
 {
 	int i;
-	for(i=1;i<nb_lignes_txt;i++)
+	for(i=22/*1*/;i<nb_lignes_txt;i++)/* par tranche de 4 max sinon Ã§a plante la machine car calcul torplong*/
 		extract_line(fichier,i);
 }
-
-void extract_index_caractere(struct fichierimage *fichier)/*OK*/
+/*
+void extract_index_caractere(struct fichierimage *fichier)
 {
 	int i, j,k;
 	int line=0;
@@ -403,7 +484,7 @@ void extract_index_caractere(struct fichierimage *fichier)/*OK*/
 			{
 				if(fichier->image[i][j].r > 0)
 				{
-					fullcaract[line][i]+=1;//songer a  creer une structure line qui aurait le tableau de i pour chaque ligneou bien un tableau de pointeurs qui pointe sur un tableau
+					fullcaract[line][i]+=1;//songer a creer une structure line qui aurait le tableau de i pour chaque ligneou bien un tableau de pointeurs qui pointe sur un tableau
 				}
 			}
 		}
@@ -413,12 +494,12 @@ void extract_index_caractere(struct fichierimage *fichier)/*OK*/
 			if(fullcaract[line][k] > 0 && fullcaract[line][k-1]==0)
 			{
 				debut_caracteres[line][index_caract]=k-2;
-				printf("carac : %d debut : %d ",index_caract,k);
+				//printf("carac : %d debut : %d ",index_caract,k);
 			}
 			else if(fullcaract[line][k]>0 && fullcaract[line][k+1]==0)
 			{
-				fin_caracteres[line][index_caract]=k+1;
-				printf("fin : %d \n",k);
+				fin_caracteres[line][index_caract]=k+2;
+				//printf("fin : %d \n",k);
 				index_caract+=1;
 			}
 		}
@@ -427,7 +508,8 @@ void extract_index_caractere(struct fichierimage *fichier)/*OK*/
 		index_caract=0;
 	}
 }
-
+*/
+/*
 void extract_caract(char nom_rep[50],int num_line,int index_caract)
 {
 	int i=0,j=0,j_bis=0,i_bis=0;;
@@ -436,23 +518,24 @@ void extract_caract(char nom_rep[50],int num_line,int index_caract)
 	struct fichierimage *buff=NULL, *ligne=NULL;
 	hauteur_ligne=fin_ligne[num_line-1] - debut_ligne[num_line-1];
 	largeur_caract=fin_caracteres[num_line-1][index_caract] - debut_caracteres[num_line-1][index_caract];
-	printf("debut : %d\t fin: %d\t largeur_caract= %d\n", debut_caracteres[num_line-1][index_caract],fin_caracteres[num_line-1][index_caract],largeur_caract );
+	//printf("debut : %d\t fin: %d\t largeur_caract= %d\n", debut_caracteres[num_line-1][index_caract],fin_caracteres[num_line-1][index_caract],largeur_caract );
 	//sprintf(nom_ligne,"Text/ligne_%d/ligne_%d.bmp",num_line,num_line);
 	ligne=charger("image_binaire.bmp");
-	//buff=nouveau(largeur_caract,hauteur_ligne);
-	buff=nouveau(ligne->entetebmp.largeur,ligne->entetebmp.hauteur);
+	//ligne=charger(nom_rep);
+	buff=nouveau(largeur_caract,hauteur_ligne);
+	//buff=nouveau(ligne->entetebmp.largeur,ligne->entetebmp.hauteur);
 	//printf("debut: %d fin: %d \n",debut_ligne[num_line-1],fin_ligne[num_line-1]);
 	for(j=debut_ligne[num_line-1]; j<fin_ligne[num_line-1]; j++)
 	{
 		for(i=debut_caracteres[num_line-1][index_caract]; i<fin_caracteres[num_line-1][index_caract]; i++)
 		{
-			/*buff->image[i_bis][j_bis].b=ligne->image[i][j].b;
+			buff->image[i_bis][j_bis].b=ligne->image[i][j].b;
 			buff->image[i_bis][j_bis].g=ligne->image[i][j].g;
 			buff->image[i_bis][j_bis].r=ligne->image[i][j].r;
-			i_bis++;*/
-			buff->image[i][j].b=ligne->image[i][j].b;
-			buff->image[i][j].g=ligne->image[i][j].g;
-			buff->image[i][j].r=ligne->image[i][j].r;
+			i_bis++;
+			//buff->image[i][j].b=ligne->image[i][j].b;
+			//buff->image[i][j].g=ligne->image[i][j].g;
+			//buff->image[i][j].r=ligne->image[i][j].r;
 		}
 		j_bis++;
 		i_bis=0;
@@ -461,13 +544,14 @@ void extract_caract(char nom_rep[50],int num_line,int index_caract)
 	enregistrer(nom,buff);
 	supprimer(buff);
 }
+*/
 
-void recup_caract()
+/*void recup_caract()
 {
 	int i,j;
 	char nom_rep[50];
 	struct fichierimage *ligne=NULL;
-	for(i=2;i<5/*nb_lignes_txt*/;i++)
+	for(i=22;i<nb_lignes_txt;i++)
 	{
 		ligne=NULL;
 		sprintf(nom_rep,"Text/ligne_%d/ligne_%d.bmp",i,i);
@@ -482,7 +566,7 @@ void recup_caract()
 		//supprimer(ligne);
 	}
 }
-
+*/
 int main()
 {
 	// exemple de declaration d'un pointeur image
@@ -505,11 +589,11 @@ int main()
 	recup_lines(fichier);
 
 	//Recup les index des caracters pour chaque ligne et compte le nb de caracteres par ligne
-	fichier = charger ("image_binaire.bmp");
-	extract_index_caractere(fichier);
+	/*fichier = charger ("image_binaire.bmp");
+	extract_index_caractere(fichier);*/
 
 	//fichier = charger("image_binaire.bmp");
-	recup_caract();
+	//recup_caract();
 
 	//2e methode pour compter et etiqueter les caracteres mais moins precises que extract_index_caractere
 	/*fichier = charger ("lignes/ligne_1.bmp");
