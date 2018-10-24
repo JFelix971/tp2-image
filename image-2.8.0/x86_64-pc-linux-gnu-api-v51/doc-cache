@@ -1,0 +1,560 @@
+# doc-cache created by Octave 4.2.2
+# name: cache
+# type: cell
+# rows: 3
+# columns: 13
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 10
+bwconncomp
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1511
+ -- Function File: CC = bwconncomp (BW)
+ -- Function File: CC = bwconncomp (BW, CONN)
+     Find connected objects.
+
+     Elements from the matrix BW, belong to an object if they have a
+     non-zero value.  The output CC is a structure with information
+     about each object;
+
+     "Connectivity"
+          The connectivity used in the boundary tracing.  This may be
+          different from the input argument, e.g., if CONN is defined as
+          a matrix of 1s and size 3x3, the "Connectivity" value will
+          still be 8.
+
+     "ImageSize"
+          The size of the matrix BW.
+
+     "NumObjects"
+          The number of objects in the image BW.
+
+     "PixelIdxList"
+          A cell array with linear indices for each element of each
+          object in BW A cell array containing where each element
+          corresponds to an object in BW.  Each element is represented
+          as a vector of linear indices of the boundary of the given
+          object.
+
+     Element connectivity CONN, to define the size of objects, can be
+     specified with a numeric scalar (number of elements in the
+     neighborhood):
+
+     '4 or 8'
+          for 2 dimensional matrices;
+     '6, 18 or 26'
+          for 3 dimensional matrices;
+
+     or with a binary matrix representing a connectivity array.
+     Defaults to 'conndef (ndims (BW), "maximal")' which is equivalent
+     to CONN of 8 and 26 for 2 and 3 dimensional matrices respectively.
+
+     See also: bwlabel, bwlabeln, bwboundaries, ind2sub, regionprops.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 23
+Find connected objects.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 6
+bwdist
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 899
+ -- Loadable Function: DIST = bwdist (BW)
+ -- Loadable Function: DIST = bwdist (BW, METHOD)
+ -- Loadable Function: [DIST, IDX] = bwdist (...)
+     Compute distance transform in binary image.
+
+     The image BW must be a binary matrix For MATLAB compatibility, no
+     check is performed, all non-zero values are considered object
+     pixels.  The return value DIST, is the distance of each background
+     pixel to the closest object pixel in a matrix of class 'single'.
+
+     IDX is the linear index for the closest object, used to calculate
+     the distance for each of the pixels.  Its class is dependent on the
+     number of elements in BW, 'uint64' if less than 2^32 elements,
+     'uint32' otherwise.
+
+     The distance can be measured through different METHODs:
+
+     euclidean (default)
+
+     chessboard
+
+     cityblock
+
+     quasi-euclidean
+
+     Currently, only 2D images are supported.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 43
+Compute distance transform in binary image.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 6
+bwfill
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 804
+ -- Loadable Function: [BW2, IDX] = bwfill(BW1, C, R, N)
+     Perform a flood-fill operation on the binary image BW1.
+
+     The flood-filling starts in the pixel (R, C).  If R and C are
+     vectors of the same length, each pixel pair (R(i), C(i)) will be a
+     starting point for a flood-fill operation.  The argument N changes
+     the neighborhood connectivity (of the holes) for the flood-fill
+     operation.  N can be either 4 or 8, and has a default value of 8.
+
+     The output is the processed image BW2 and the indexes of the filled
+     pixels IDX
+
+ -- Loadable Function: [BW2, IDX] = bwfill(BW1, "holes", N)
+     If the string "holes" is given instead of starting points for the
+     flood-fill operation, the function finds interior holes in BW1 and
+     fills them.
+
+     See also: imfill.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 55
+Perform a flood-fill operation on the binary image BW1.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 8
+bwlabeln
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 882
+ -- Loadable Function: [L, NUM] = bwlabeln (BW)
+ -- Loadable Function: [L, NUM] = bwlabeln (BW, N)
+     Label foreground objects in the n-dimensional binary image BW.
+
+     The optional argument N sets the connectivity and defaults 26, for
+     26-connectivity in 3-D images.  Other possible values are 18 and 6
+     for 3-D images, 4 and 8 for 2-D images, or an arbitrary
+     N-dimensional binary connectivity mask where each dimension is of
+     size 3.
+
+     The output L is an Nd-array where 0 indicates a background pixel, 1
+     indicates that the pixel belongs to object number 1, 2 that the
+     pixel belongs to object number 2, etc.  The total number of objects
+     is NUM.
+
+     The algorithm used is a disjoint-set data structure, a.k.a.
+     union-find.  See, for example,
+     http://en.wikipedia.org/wiki/Union-find
+
+     See also: bwconncomp, bwlabel, regionprops.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 62
+Label foreground objects in the n-dimensional binary image BW.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 7
+conndef
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1301
+ -- Loadable Function: conndef (CONN)
+ -- Loadable Function: conndef (MASK)
+ -- Loadable Function: conndef (NDIMS, TYPE)
+     Create connectivity array.
+
+     Creates a matrix of for morphological operations, where elements
+     with a value of 1 are considered connected to the center element (a
+     connectivity array).
+
+     It can be specified by the number of dimensions, NDIMS, and TYPE
+     which must be one of the following strings:
+
+     "minimal"
+          Neighbours touch the central element on a
+          (NDIMS-1)-dimensional surface.
+
+     "maximal"
+          Neighbours touch the central element in any way.  Equivalent
+          to 'ones (repmat (3, 1, NDIMS))'.
+
+     the number of connected elements to the center element, CONN, in
+     which case the following are valid:
+
+     4
+          Two-dimensional 4-connected neighborhood.
+
+     8
+          Two-dimensional 8-connected neighborhood.
+
+     6
+          Three-dimensional 6-connected neighborhood.
+
+     18
+          Three-dimensional 18-connected neighborhood.
+
+     26
+          Three-dimensional 26-connected neighborhood.
+
+     or a connectivity array itself, in which case it checks for its
+     validity and returns itself.  In such case, it is equivalent to
+     'iptcheckconn'.
+
+     See also: iptcheckconn, strel.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 26
+Create connectivity array.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 12
+graycomatrix
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 606
+ -- Loadable Function: P = graycomatrix(IM, LEVELS, DISTANCES, ANGLES)
+     Calculates the gray-level co-occurrence matrix P of a gray-level
+     image IM.
+
+     P is a 4-dimensional matrix (histogram).  The value P(I,J,D,THETA)
+     is the number of times that gray-level J occurs at a distance D and
+     at an angle THETA from gray-level I.
+
+     IM is the input image which should contain integers in [0,
+     LEVELS-1], where LEVELS indicate the number of gray-levels counted
+     (typically 256 for an 8-bit image).  DISTANCES and ANGLES are
+     vectors of the different distances and angles to use.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 74
+Calculates the gray-level co-occurrence matrix P of a gray-level image
+IM.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 10
+hough_line
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 424
+ -- Loadable Function: [H, R] = hough_line(I, ANGLES)
+     Calculate the straight line Hough transform of a binary image I.
+
+     The angles are given in radians and default to -pi/2:pi/2.
+
+     H is the resulting Hough transform, and R is the radial distances.
+
+     The algorithm is described in Digital Image Processing by Gonzales
+     & Woods (2nd ed., p.  587)
+
+     For a Matlab compatible Hough transform see hough.m
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 64
+Calculate the straight line Hough transform of a binary image I.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 7
+imerode
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 1027
+ -- Loadable Function: imerode (IM, SE)
+ -- Loadable Function: imerode (IM, SE, SHAPE)
+     Perform morphological erosion.
+
+     The image IM must be a numeric matrix with any number of
+     dimensions.  The erosion is performed with the structuring element
+     SE which can be a:
+
+        * strel object;
+        * array of strel objects as returned by '@strel/getsequence';
+        * matrix of 0's and 1's.
+
+     To perform a non-flat erosion, SE must be a strel object.
+
+     The size of the result is determined by the optional SHAPE argument
+     which takes the following values:
+
+     "same" (default)
+          Return image of the same size as input IM.
+
+     "full"
+          Return the full erosion (image is padded to accommodate SE
+          near the borders).
+
+     "valid"
+          Return only the parts which do not include the padded edges.
+
+     In case of a SE with a size of even length, the center is
+     considered at indices 'floor ([size(SE)/2] + 1)'.
+
+     See also: imdilate, imopen, imclose, strel.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 30
+Perform morphological erosion.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 13
+imreconstruct
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 159
+ -- Loadable Function: imreconstruct (MARKER, MASK)
+ -- Loadable Function: imreconstruct (MARKER, MASK, CONN)
+
+     See also: imclearborder, imdilate, imerode.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 43
+See also: imclearborder, imdilate, imerode.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 6
+intlut
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 765
+ -- Function File: intlut (A, LUT)
+     Convert integer values with lookup table (LUT).
+
+     Replace the values from the array A with the corresponding value
+     from the lookup table LUT.  This is equivalent as indexing LUT with
+     A, with a base equal to A minimum possible value, i.e., 'intmin
+     (A)'.
+
+     For the simplest case of uint8 and uint16 class, it corresponds to:
+
+          LUT(double (A) +1)
+
+     but without the temporary conversion of A to floating point thus
+     reducing memory usage.
+
+     A and LUT must be of the same class, and uint8, uint16, or int16.
+     LUT must have exactly 256 elements for class uint8, and 65536 for
+     classes uint16 and int16.  Output is of same class as LUT.
+
+     See also: ind2gray, ind2rgb, rgb2ind.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 47
+Convert integer values with lookup table (LUT).
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 14
+nonmax_supress
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 616
+ -- Loadable Function: nonmax_supress (ES, EO)
+     Performs non-maximum supression on the given edge data.  ES is a
+     matrix containing the edge strength (the length of the gradient),
+     and EO is the edge normal orientation (the direction of the
+     gradient).
+
+ -- Loadable Function: nonmax_supress (ES, EO, LOW, HIGH )
+     Performs non-maximum supression and hysteresis thresholdong, using
+     LOW and HIGH as thresholds.
+
+     This function is designed to be used as part of the Canny edge
+     detection, and not to be used in general.  So if you use this
+     function: Beware...
+
+     See also: edge.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 55
+Performs non-maximum supression on the given edge data.
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 12
+rotate_scale
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 807
+ -- Loadable Function: IM1 = rotate_scale(IM0, LM0, LM1, OUT_SIZE)
+     Arbitrary rotation and scaling of a gray-scale image using fast
+     bilinear interpolation.
+
+     The image IM0 will be rotated and scaled such that the landmark
+     points in LM0 in the image will be placed in the landmark points in
+     LM1 in the output image IM1.  The landmark points are given as a 2
+     by 2 matrix where the first row contains the x-coordinates of the
+     landmarks, and the second row contains the y-coordinates.
+
+     The size of the output image is given in the vector OUT_SIZE.
+
+     The following example shows basic usage of the function
+          im0 = zeros(100); im0(25:75, 25:75)=1;
+          im1 = rotate_scale( im0, [40,60; 50,50], [60,90; 60,90], [120,120]);
+
+     See also: imrotate, imresize.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 80
+Arbitrary rotation and scaling of a gray-scale image using fast bilinear
+interpo
+
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 9
+watershed
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 655
+ -- Function File: watershed (IM)
+ -- Function File: watershed (IM, CONN)
+     Compute watershed transform.
+
+     Computes by immersion
+
+     Element connectivity CONN, to define the size of objects, can be
+     specified with a numeric scalar (number of elements in the
+     neighborhood):
+
+     '4 or 8'
+          for 2 dimensional matrices;
+     '6, 18 or 26'
+          for 3 dimensional matrices;
+
+     or with a binary matrix representing a connectivity array.
+     Defaults to 'conndef (ndims (BW), "maximal")' which is equivalent
+     to CONN of 8 and 26 for 2 and 3 dimensional matrices respectively.
+
+     See also: bwdist, bwlabeln, regionprops.
+
+
+# name: <cell-element>
+# type: sq_string
+# elements: 1
+# length: 28
+Compute watershed transform.
+
+
+
+
+

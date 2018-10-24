@@ -2,6 +2,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<SDL/SDL.h>
 #include<sys/types.h>
 #include<sys/stat.h>
 #include<dirent.h>
@@ -340,8 +341,7 @@ void extract_index_caractere2(struct fichierimage *fichier,int line)
 		}
 	}
 	nb_caract_by_line[line]=index_caract;
-	printf("ligne : %d nb caract = %d\n",line+1,nb_caract_by_line[line]);
-	//index_caract=0;
+	//printf("ligne : %d nb caract = %d\n",line+1,nb_caract_by_line[line]);
 }
 
 void extract_caract2(struct fichierimage *fichier,int num_line,int index_caract)
@@ -357,7 +357,7 @@ void extract_caract2(struct fichierimage *fichier,int num_line,int index_caract)
 	//ligne=charger(nom_rep);
 	buff=nouveau(largeur_caract,hauteur_ligne);
 	//buff=nouveau(ligne->entetebmp.largeur,ligne->entetebmp.hauteur);
-	printf("debut: %d fin: %d \n",debut_ligne[num_line-1],fin_ligne[num_line-1]);
+	//printf("debut: %d fin: %d \n",debut_ligne[num_line-1],fin_ligne[num_line-1]);
 	for(j=debut_ligne[num_line-1]; j<fin_ligne[num_line-1]; j++)
 	{
 		for(i=debut_caracteres[num_line-1][index_caract]; i<fin_caracteres[num_line-1][index_caract]; i++)
@@ -366,9 +366,6 @@ void extract_caract2(struct fichierimage *fichier,int num_line,int index_caract)
 			buff->image[i_bis][j_bis].g=ligne->image[i][j].g;
 			buff->image[i_bis][j_bis].r=ligne->image[i][j].r;
 			i_bis++;
-			//buff->image[i][j].b=ligne->image[i][j].b;
-			//buff->image[i][j].g=ligne->image[i][j].g;
-			//buff->image[i][j].r=ligne->image[i][j].r;
 		}
 		j_bis++;
 		i_bis=0;
@@ -448,11 +445,11 @@ void extract_line(struct fichierimage *fichier,int num_line)/*OK*/
 	enregistrer(nom,buff);
 	supprimer(buff);
 
-	extract_index_caractere2(fichier,num_line-1);//Extraction des index par num_line
+	/*extract_index_caractere2(fichier,num_line-1);//Extraction des index par num_line
 	for(i=0;i<nb_caract_by_line[num_line-1];i++)
 	{
 		extract_caract2(fichier,num_line,i);
-	}
+	}*/
 	//supprimer(buff);
 
 }
@@ -460,7 +457,7 @@ void extract_line(struct fichierimage *fichier,int num_line)/*OK*/
 void recup_lines(struct fichierimage *fichier)/*OK*/
 {
 	int i;
-	for(i=22/*1*/;i<nb_lignes_txt;i++)/* par tranche de 4 max sinon ça plante la machine car calcul torplong*/
+	for(i=1/*1*/;i<nb_lignes_txt;i++)/* par tranche de 4 max sinon ça plante la machine car calcul torplong*/
 		extract_line(fichier,i);
 }
 
@@ -567,6 +564,106 @@ void recup_caract()
 	}
 }
 
+void new_bdd(char nom_fichier[50],int debut,int fin,int ind)
+{
+	int i=0,j=0,j_bis=0,i_bis=0;
+	int hauteur_ligne=0,largeur_caract=0;
+	int num=0;
+	char nom[50];
+	char nom_file[50];
+	struct fichierimage *buff=NULL, *ligne=NULL;
+	num=ind;
+	hauteur_ligne=128;
+	largeur_caract=fin - debut;
+
+	ligne=charger(nom_fichier);
+	//ligne=charger(nom_rep);
+	buff=nouveau(largeur_caract,hauteur_ligne);
+
+	for(j=0; j<hauteur_ligne; j++)
+	{
+		for(i=debut; i<fin; i++)
+		{
+			buff->image[i_bis][j_bis].b=ligne->image[i][j].b;
+			buff->image[i_bis][j_bis].g=ligne->image[i][j].g;
+			buff->image[i_bis][j_bis].r=ligne->image[i][j].r;
+			i_bis++;
+		}
+		j_bis++;
+		i_bis=0;
+	}
+	if(num<10)
+	{
+		sprintf(nom_file,"img00%d-01002.bmp",num);
+	}
+	else
+	{
+		sprintf(nom_file,"img0%d-01002.bmp",num);
+	}
+	sprintf(nom,"BDD_caracteres/caracteres_bmp/%s",nom_file);
+	enregistrer(nom,buff);
+	supprimer(buff);
+}
+
+void  resize_bdd(struct fichierimage *fichier,int num,char nom_fichier[50])
+{
+	int i, j, k;
+	int debut=0, fin=0;
+	int fullcaract[fichier->entetebmp.largeur];
+
+	for(i=0;i<fichier->entetebmp.largeur;i++)
+		fullcaract[i]=0;
+
+	//On parcours limage et si cest allume on incremente full line pour determiner les lignes en j
+	for(j=0;j<fichier->entetebmp.hauteur; j++)
+	{
+		for(i=0;i<fichier->entetebmp.largeur;i++)
+		{
+			if(fichier->image[i][j].r > 0)
+			{
+				fullcaract[i]+=1;
+			}
+		}
+	}
+	//Ajout des index de fin et debut de chaque ligne
+	for(k=0;k<fichier->entetebmp.largeur; k++)
+	{
+		if(fullcaract[k] > 0 && fullcaract[k-1]==0)
+		{
+			debut=k-2;
+			//printf("carac : %d debut : %d ",index_caract,k);
+		}
+		else if(fullcaract[k] > 0 && fullcaract[k+1]==0)
+		{
+			fin=k+2;
+			//printf("fin : %d \n",k);
+		}
+	}
+	new_bdd(nom_fichier,debut,fin,num);
+}
+
+void bdd()
+{
+	int i;
+	char nom_file[50];
+	struct fichierimage *fichier=NULL;
+
+	for(i=1;i<63;i++)
+	{
+		if(i<10)
+		{
+			sprintf(nom_file,"BDD_caracteres/caracteres_bmp/img00%d-01002.bmp",i);
+		}
+		else
+		{
+			sprintf(nom_file,"BDD_caracteres/caracteres_bmp/img0%d-01002.bmp",i);
+		}
+		fichier=charger(nom_file);
+		resize_bdd(fichier,i,nom_file);
+		supprimer(fichier);
+	}
+}
+
 int main()
 {
 	// exemple de declaration d'un pointeur image
@@ -574,6 +671,7 @@ int main()
 
 	//Init init_variables_globales
 	init_variables_globales();
+	bdd();
 
 	//1- Inversion des Contrastes  de l'image et binarisation de l'image
 	fichier = charger ("Document1.bmp");
@@ -598,5 +696,5 @@ int main()
 	//2e methode pour compter et etiqueter les caracteres mais moins precises que extract_index_caractere
 	/*fichier = charger ("lignes/ligne_1.bmp");
 	amelioration_eti(fichier);*/
-	
+
 }
