@@ -14,6 +14,9 @@ int debut_ligne[30];
 int fin_ligne[30];
 int debut_caracteres[30][100];
 int fin_caracteres[30][100];
+int ACTIVE=0; // Active= 1  c'est pour lancer la procedure sur lextraction des caracteres
+int DEB = 1;
+int FIN = 4;//Fin pour extraction caractere, il ne doit jamais avoir plus de 4 de diff avec DEB
 
 //------------------------------------------------------------------------------
 // Code source pour le projet d'UE035
@@ -34,13 +37,11 @@ int fin_caracteres[30][100];
 // retourne un pointeur de type : struct fichierimage *
 //------------------------------------------------------------------------------
 
+/*Initialisation des variables globales*/
 void init_variables_globales()/*OK*/
 {
 	//Init des tableaux globaux pour index line and caractere
 	int i,j;
-	//int rep;
-	//char NOM_REP[50];
-	//rep=mkdir("Text/",S_IRWXU);
 	for(i=0;i<nb_lignes_txt;i++)
 	{
 		debut_ligne[i]=0;
@@ -54,6 +55,7 @@ void init_variables_globales()/*OK*/
 	}
 }
 
+/*Detecte le plus petit voisin */
 int minVoisin(int *tab)/*OK*/
 {
 	int i, min=0;
@@ -69,6 +71,7 @@ int minVoisin(int *tab)/*OK*/
 	return min;
 }
 
+/*Detecte la position du premier pixel blanc synonyme debut texte*/
 int debut_text(struct fichierimage *fichier)/*OK*/
 {
 	int i, j;
@@ -76,7 +79,6 @@ int debut_text(struct fichierimage *fichier)/*OK*/
 		for(i=0;i<fichier->entetebmp.hauteur; i++)
 			if(fichier->image[i][j].r == 255)
 				return j;
-
 }
 
 /*Permet de mettre l'image en niv gris*/
@@ -305,6 +307,7 @@ void amelioration_eti(struct fichierimage *fichier)/*OK*/
 	printf("nb etiquette = %d\n",etiquette);
 }
 
+/*Extrait les indices debut et fin de chaque caractere par ligne -- Methode imbrique avec extraction ligne*/
 void extract_index_caractere2(struct fichierimage *fichier,int line)
 {
 	int i, j, k;
@@ -344,6 +347,7 @@ void extract_index_caractere2(struct fichierimage *fichier,int line)
 	//printf("ligne : %d nb caract = %d\n",line+1,nb_caract_by_line[line]);
 }
 
+/*Extraction des caractere et enregistrement dans les dossiers ligne*/
 void extract_caract2(struct fichierimage *fichier,int num_line,int index_caract)
 {
 	int i=0,j=0,j_bis=0,i_bis=0;;
@@ -375,6 +379,7 @@ void extract_caract2(struct fichierimage *fichier,int num_line,int index_caract)
 	supprimer(buff);
 }
 
+/*Recuperation des indices debut et fin de chaque ligne*/
 void extract_index_line(struct fichierimage *fichier)/*OK*/
 {
 	int i, j;
@@ -415,6 +420,7 @@ void extract_index_line(struct fichierimage *fichier)/*OK*/
 	nb_lignes_txt=index_line+1;
 }
 
+/*Extraction ligne dans chaque image ligne*/
 void extract_line(struct fichierimage *fichier,int num_line)/*OK*/
 {
 	int i=0,j=0,j_bis=0;
@@ -445,11 +451,14 @@ void extract_line(struct fichierimage *fichier,int num_line)/*OK*/
 	enregistrer(nom,buff);
 	supprimer(buff);
 
-	/*extract_index_caractere2(fichier,num_line-1);//Extraction des index par num_line
-	for(i=0;i<nb_caract_by_line[num_line-1];i++)
+	if(ACTIVE == 1)
 	{
-		extract_caract2(fichier,num_line,i);
-	}*/
+		extract_index_caractere2(fichier,num_line-1);//Extraction des index par num_line
+		for(i=0;i<nb_caract_by_line[num_line-1];i++)
+		{
+			extract_caract2(fichier,num_line,i);
+		}
+	}
 	//supprimer(buff);
 
 }
@@ -461,7 +470,7 @@ void recup_lines(struct fichierimage *fichier)/*OK*/
 		extract_line(fichier,i);
 }
 
-
+/*Methhode 2 extraction index caractere*/
 void extract_index_caractere(struct fichierimage *fichier)
 {
 	int i, j,k;
@@ -564,6 +573,7 @@ void recup_caract()
 	}
 }
 
+/*Efface les bordures noires en largeur de la base*/
 void new_bdd(char nom_fichier[50],int debut,int fin,int ind)
 {
 	int i=0,j=0,j_bis=0,i_bis=0;
@@ -641,7 +651,7 @@ void  resize_bdd(struct fichierimage *fichier,int num,char nom_fichier[50])
 	}
 	new_bdd(nom_fichier,debut,fin,num);
 }
-
+/*Fonction permettant de changer les dimensions de la base*/
 void bdd()
 {
 	int i;
